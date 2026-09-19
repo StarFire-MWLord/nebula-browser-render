@@ -13,7 +13,7 @@ app.use((req,res,next)=>{
   res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=()');
   next();
 });
-app.use(express.static(path.join(__dirname,'public'), {extensions:['html']}));
+app.use((_req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 app.get('/health', (_req,res)=>res.status(200).json({ok:true}));
 app.get('*', (_req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 app.listen(port,'0.0.0.0',()=>console.log(`Nebula Browser listening on 0.0.0.0:${port}`));
