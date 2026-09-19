@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Nebula Browser</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">N</div><span>Nebula</span><span class="badge">GX</span></div>
+    <div id="tabs" class="tabs"></div>
+    <button id="newTab" class="icon">＋</button>
+  </header>
+  <nav>
+    <button id="back" class="icon">←</button><button id="forward" class="icon">→</button><button id="reload" class="icon">↻</button>
+    <div class="omnibox"><span id="lock">◇</span><input id="address" autocomplete="off" spellcheck="false" placeholder="Search or enter address"/><button id="star">☆</button></div>
+    <button id="privateBtn" class="pill">◉ Private</button><button id="settings" class="icon">⚙</button>
+  </nav>
+  <main>
+    <aside>
+      <button data-action="home" class="side active">⌂<span>Home</span></button>
+      <button data-action="youtube" class="side">▶<span>YouTube</span></button>
+      <button data-action="bookmarks" class="side">★<span>Bookmarks</span></button>
+      <button data-action="history" class="side">◷<span>History</span></button>
+      <div class="spacer"></div>
+      <button data-action="clear" class="side">⌫<span>Clear data</span></button>
+    </aside>
+    <section id="viewport"></section>
+  </main>
+</div>
+<div id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
