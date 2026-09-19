@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: nebula-browser
+    runtime: docker
+    healthCheckPath: /health
+    autoDeployTrigger: commit
