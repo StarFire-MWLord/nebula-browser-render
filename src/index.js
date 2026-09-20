@@ -14,36 +14,22 @@ const app = express();
 wispLogging.set_level(wispLogging.INFO);
 
 const PASSWORD = process.env.STARFIRE_PASSWORD || "Jackegg1218";
-let sharedSettings = {
-  theme: "rainbow",
-  starColor: "theme",
-  animation: true,
-  starCount: 100,
-  mouseSensitivity: 1.5,
-  animationSpeed: 1.5,
-  freezeMode: "off"
-};
+let sharedSettings = {theme:"rainbow",starColor:"theme",animation:true,starCount:100,mouseSensitivity:1.5,animationSpeed:1.5,freezeMode:"off"};
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "16kb" }));
-
 app.get("/healthz", (_req, res) => res.status(200).send("ok"));
-
 app.post("/api/login", (req, res) => {
   if (req.body?.password !== PASSWORD) return res.status(401).json({ ok: false });
   res.setHeader("Cache-Control", "no-store");
   res.json({ ok: true });
 });
-
 app.get("/api/settings", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json(sharedSettings);
 });
-
 app.put("/api/settings", (req, res) => {
-  if (req.get("X-Starfire-Password") !== PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  if (req.get("X-Starfire-Password") !== PASSWORD) return res.status(401).json({ error: "Unauthorized" });
   const b = req.body || {};
   sharedSettings = {
     theme: String(b.theme || sharedSettings.theme),
@@ -56,14 +42,13 @@ app.put("/api/settings", (req, res) => {
   };
   res.json(sharedSettings);
 });
-
 app.use((req, res, next) => {
-  if (["/", "/index.html", "/app.js", "/style.css", "/sw.js", "/uv.config.js"].includes(req.path)) {
+  if (req.path === "/" || req.path === "/index.html" || req.path === "/app.js" ||
+      req.path === "/sw.js" || req.path === "/uv.config.js") {
     res.setHeader("Cache-Control", "no-store, max-age=0");
   }
   next();
 });
-
 app.use(express.static(publicPath));
 app.use("/uv/", express.static(uvPath));
 app.use("/epoxy/", express.static(epoxyPath));
@@ -79,7 +64,10 @@ const server = createServer((req, res) => {
 server.on("upgrade", (req, socket, head) => {
   const pathname = new URL(req.url || "/", "http://localhost").pathname;
   if (pathname === "/wisp/") {
+    // wisp-js distinguishes /wisp/ from legacy wsproxy paths using req.url.
+    // Normalize it before routing so query strings cannot select the wrong protocol.
     req.url = pathname;
+    console.log(`[wisp] upgrade ${pathname}`);
     wisp.routeRequest(req, socket, head);
     return;
   }
