@@ -13,6 +13,13 @@ const app = express();
 
 app.disable("x-powered-by");
 app.get("/healthz", (_req, res) => res.status(200).send("ok"));
+app.use((req, res, next) => {
+  if (req.path === "/" || req.path === "/index.html" || req.path === "/app.js" ||
+      req.path === "/sw.js" || req.path === "/uv.config.js") {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+  }
+  next();
+});
 app.use(express.static(publicPath));
 app.use("/uv/", express.static(uvPath));
 app.use("/epoxy/", express.static(epoxyPath));
@@ -26,8 +33,12 @@ const server = createServer((req, res) => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-  if (req.url?.startsWith("/wisp/")) wisp.routeRequest(req, socket, head);
-  else socket.end();
+  if (req.url?.startsWith("/wisp/")) {
+    console.log(`[wisp] upgrade ${req.url}`);
+    wisp.routeRequest(req, socket, head);
+  } else {
+    socket.end();
+  }
 });
 
 const port = Number.parseInt(process.env.PORT || "10000", 10);
