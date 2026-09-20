@@ -2,7 +2,7 @@ services:
   - type: web
     name: ultraviolet-proxy
     runtime: node
-    plan: free
+    plan: pro
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /healthz
