@@ -45,8 +45,10 @@ async function setupProxy() {
   if (!readyReg.active) await waitForActivation(readyReg);
 
   status.textContent = "Loading transport…";
-  const { BareMuxConnection } = await import("/baremux/index.js?v=starfire-3");
-  const conn = new BareMuxConnection("/baremux/worker.js");
+  if (!window.BareMux?.BareMuxConnection) {
+    throw new Error("BareMux browser library did not load");
+  }
+  const conn = new window.BareMux.BareMuxConnection("/baremux/worker.js");
   const wisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
 
   status.textContent = "Connecting transport…";
