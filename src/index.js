@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 import { uvPath } from "@titaniumnetwork-dev/ultraviolet";
 import { epoxyPath } from "@mercuryworkshop/epoxy-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
-import wisp from "wisp-server-node";
+import { server as wisp, logging as wispLogging } from "@mercuryworkshop/wisp-js/server";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const publicPath = join(__dirname, "../public");
 const app = express();
+
+wispLogging.set_level(wispLogging.INFO);
 
 app.disable("x-powered-by");
 app.get("/healthz", (_req, res) => res.status(200).send("ok"));
@@ -33,12 +35,16 @@ const server = createServer((req, res) => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-  if (req.url?.startsWith("/wisp/")) {
-    console.log(`[wisp] upgrade ${req.url}`);
+  const pathname = new URL(req.url || "/", "http://localhost").pathname;
+  if (pathname === "/wisp/") {
+    // wisp-js distinguishes /wisp/ from legacy wsproxy paths using req.url.
+    // Normalize it before routing so query strings cannot select the wrong protocol.
+    req.url = pathname;
+    console.log(`[wisp] upgrade ${pathname}`);
     wisp.routeRequest(req, socket, head);
-  } else {
-    socket.end();
+    return;
   }
+  socket.end();
 });
 
 const port = Number.parseInt(process.env.PORT || "10000", 10);
