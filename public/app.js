@@ -2,33 +2,16 @@ const $ = (s) => document.querySelector(s);
 const form = $("#proxy-form"), input = $("#proxy-address"), status = $("#status");
 const STORAGE_SETTINGS = "nebula.settings.v1", STORAGE_FAVS = "nebula.favorites.v1";
 
+const loginGate = $("#loginGate"), loginForm = $("#loginForm"), loginPassword = $("#loginPassword"), loginError = $("#loginError");
 let siteUnlocked = false;
-let sessionPassword = "";
-const loginGate = $("#loginGate");
-const loginForm = $("#loginForm");
-const loginPassword = $("#loginPassword");
-const loginError = $("#loginError");
-
-async function loadSharedSettings() {
-  try {
-    const response = await fetch("/api/settings", { cache: "no-store" });
-    if (!response.ok) return;
-    settings = { ...defaults, ...await response.json() };
-    localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
-    syncControls();
-    rebuildStars();
-  } catch {}
-}
-
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginError.textContent = "Checking…";
   try {
-    const password = loginPassword.value;
     const response = await fetch("/api/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password })
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({password: loginPassword.value})
     });
     if (!response.ok) {
       loginError.textContent = "Incorrect password.";
@@ -36,13 +19,10 @@ loginForm.addEventListener("submit", async (event) => {
       return;
     }
     siteUnlocked = true;
-    sessionPassword = password;
     loginPassword.value = "";
     loginError.textContent = "";
     loginGate.classList.add("unlocked");
-    await loadSharedSettings();
     input.focus();
-    startProxy();
   } catch {
     loginError.textContent = "Could not contact the server.";
   }
@@ -73,7 +53,7 @@ async function setupProxy() {
   if (!("serviceWorker" in navigator)) throw new Error("Service workers are not supported by this browser.");
 
   status.textContent = "Registering proxy…";
-  const reg = await navigator.serviceWorker.register("/sw.js?v=starfire-3", {
+  const reg = await navigator.serviceWorker.register("/sw.js?v=starfire-refresh-1", {
     scope: "/",
     updateViaCache: "none"
   });
@@ -134,20 +114,7 @@ form.addEventListener("submit", e => { e.preventDefault(); openTarget(input.valu
 const defaults = {theme:"rainbow",starColor:"theme",animation:true,starCount:100,mouseSensitivity:1.5,animationSpeed:1.5,freezeMode:"off"};
 let settings = {...defaults, ...JSON.parse(localStorage.getItem(STORAGE_SETTINGS) || "{}")};
 const controls = ["theme","starColor","animation","starCount","mouseSensitivity","animationSpeed","freezeMode"];
-async function saveSettings(){
-  localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
-  if (!siteUnlocked || !sessionPassword) return;
-  try {
-    await fetch("/api/settings", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Starfire-Password": sessionPassword
-      },
-      body: JSON.stringify(settings)
-    });
-  } catch {}
-}
+function saveSettings(){ localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings)); }
 function syncControls(){
   for(const id of controls){ const el=$("#"+id); if(el.type==="checkbox") el.checked=!!settings[id]; else el.value=settings[id]; }
   $("#countValue").textContent=settings.starCount; $("#mouseValue").textContent=Number(settings.mouseSensitivity).toFixed(1); $("#speedValue").textContent=Number(settings.animationSpeed).toFixed(1);
@@ -198,4 +165,5 @@ function draw(now){
 addEventListener("resize",()=>{resize();rebuildStars();}); addEventListener("pointermove",e=>{mouse.x=e.clientX;mouse.y=e.clientY;}); addEventListener("pointerleave",()=>{mouse.x=mouse.y=-9999;});
 resize();rebuildStars();requestAnimationFrame(draw);
 
-// Proxy startup is intentionally deferred until the password is accepted.
+// UI is fully initialized; proxy startup can no longer disable the controls if it fails.
+startProxy();
