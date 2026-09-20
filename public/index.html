@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Starfire</title>
   <meta name="theme-color" content="#02030a">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=restore1">
   <script src="/uv/uv.bundle.js"></script>
   <script src="/uv.config.js"></script>
 </head>
 <body>
-  <canvas id="stars" aria-hidden="true"></canvas>
-
   <div id="loginGate" class="loginGate">
     <form id="loginForm" class="loginCard">
       <div class="loginBrand">STARFIRE</div>
@@ -21,19 +19,14 @@
       <div id="loginError" class="loginError"></div>
     </form>
   </div>
-
-  <div id="tabBar" class="tabBar">
-    <div id="tabStrip" class="tabStrip"></div>
-    <button id="newTabBtn" class="tabTool" title="New tab">+</button>
-    <button id="refreshTabBtn" class="tabTool" title="Refresh current proxied page">↻</button>
-  </div>
+  <canvas id="stars" aria-hidden="true"></canvas>
   <div class="shell">
     <header>
       <button id="favoritesBtn" class="iconBtn" title="Favorites">★</button>
       <button id="settingsBtn" class="iconBtn" title="Settings">⚙</button>
     </header>
 
-    <main id="home" class="home">
+    <main class="home">
       <div class="brand">STARFIRE</div>
       <div class="tagline">Browse through the stars.</div>
       <form id="proxy-form" class="search">
@@ -43,7 +36,6 @@
       </form>
       <div id="status" class="status">Starting proxy…</div>
     </main>
-    <div id="tabViews" class="tabViews"></div>
   </div>
 
   <aside id="settingsPanel" class="panel">
@@ -95,6 +87,6 @@
   </aside>
 
   <script src="/baremux/index.js?v=starfire-4"></script>
-  <script type="module" src="/app.js?v=starfire-5"></script>
+  <script type="module" src="/app.js?v=restore1"></script>
 </body>
 </html>
