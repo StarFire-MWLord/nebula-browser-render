@@ -14,47 +14,15 @@ const app = express();
 wispLogging.set_level(wispLogging.INFO);
 
 const STARFIRE_PASSWORD = process.env.STARFIRE_PASSWORD || "Jackegg1218";
-let sharedSettings = {
-  theme: "rainbow",
-  starColor: "theme",
-  animation: true,
-  starCount: 100,
-  mouseSensitivity: 1.5,
-  animationSpeed: 1.5,
-  freezeMode: "off"
-};
 
 app.disable("x-powered-by");
-app.use(express.json({ limit: "16kb" }));
-app.get("/healthz", (_req, res) => res.status(200).send("ok"));
-
+app.use(express.json({ limit: "8kb" }));
 app.post("/api/login", (req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  if (req.body?.password !== STARFIRE_PASSWORD) return res.status(401).json({ ok: false });
-  res.json({ ok: true });
+  if (req.body?.password !== STARFIRE_PASSWORD) return res.status(401).json({ok:false});
+  res.json({ok:true});
 });
-
-app.get("/api/settings", (_req, res) => {
-  res.setHeader("Cache-Control", "no-store");
-  res.json(sharedSettings);
-});
-
-app.put("/api/settings", (req, res) => {
-  if (req.get("X-Starfire-Password") !== STARFIRE_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  const b = req.body || {};
-  sharedSettings = {
-    theme: String(b.theme || sharedSettings.theme),
-    starColor: String(b.starColor || sharedSettings.starColor),
-    animation: Boolean(b.animation),
-    starCount: Math.max(20, Math.min(220, Number(b.starCount) || 100)),
-    mouseSensitivity: Math.max(.1, Math.min(10, Number(b.mouseSensitivity) || 1.5)),
-    animationSpeed: Math.max(.1, Math.min(10, Number(b.animationSpeed) || 1.5)),
-    freezeMode: String(b.freezeMode || sharedSettings.freezeMode)
-  };
-  res.json(sharedSettings);
-});
+app.get("/healthz", (_req, res) => res.status(200).send("ok"));
 app.use((req, res, next) => {
   if (req.path === "/" || req.path === "/index.html" || req.path === "/app.js" ||
       req.path === "/sw.js" || req.path === "/uv.config.js") {
